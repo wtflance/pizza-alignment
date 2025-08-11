@@ -38,7 +38,7 @@ const ARCH = {
 
 const options = {
   crust: ["Thin & crispy", "Thick & fluffy", "Stuffed crust"],
-  topping: ["Ham", "Bacon", "Jalapeños", "Mushrooms"],
+  topping: ["Ham", "Bacon", "Jalapeños", "Mushrooms", "Anchovies", "Pepperoni", "Olives"],
   sauce: ["Tomato", "BBQ", "White garlic"],
   style: ["Tip first", "Crust first", "Fold slice", "Random bites"]
 };
@@ -46,15 +46,27 @@ let state = { crust: null, topping: null, sauce: null, style: null };
 
 function computeAlignment() {
   let x=1, y=1;
+  // Sauce: good/evil tilt
   if(state.sauce==="Tomato") y-=1;
   if(state.sauce==="White garlic") y+=1;
+
+  // Style: lawful/chaotic tilt
   if(state.style==="Tip first") x-=1;
   if(state.style==="Fold slice") x+=1;
   if(state.style==="Random bites") x+=1;
-  if(state.topping==="Bacon") x+=1;
-  if(state.topping==="Jalapeños") x+=1;
+
+  // Topping influences
+  if(state.topping==="Bacon") x+=1; // chaos bold
+  if(state.topping==="Jalapeños") x+=1; // spicy chaos
+  if(state.topping==="Anchovies") { x-=1; y+=1; } // lawful evil lean
+  if(state.topping==="Pepperoni") { x+=1; } // chaos lean
+  if(state.topping==="Olives") { y+=1; } // slightly evil salty vibes
+
+  // Crust influences
   if(state.crust==="Thin & crispy") x-=1;
   if(state.crust==="Stuffed crust") x+=1;
+
+  // Clamp values
   x=Math.max(0,Math.min(2,x));
   y=Math.max(0,Math.min(2,y));
   return {x,y};
