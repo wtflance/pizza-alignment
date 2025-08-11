@@ -1,5 +1,103 @@
 <!DOCTYPE html>
-<html>
-  <head><meta charset="utf-8"><title>Test</title></head>
-  <body><h1>It works!</h1><p>If you see this, Pages is rendering HTML.</p></body>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pizza Alignment App</title>
+<style>
+  body { font-family: sans-serif; background: #fff9f4; padding: 20px; }
+  h1 { text-align: center; }
+  .section { background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+  button { margin: 5px 0; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; background: #f8f8f8; cursor: pointer; }
+  button.active { border-color: #d33; background: #fee; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .cell { padding: 8px; border: 1px solid #ccc; border-radius: 6px; background: #fafafa; text-align: center; }
+  .highlight { border-color: #d33; background: #fee; }
+</style>
+</head>
+<body>
+<h1>Pizza Alignment App</h1>
+<div id="quiz"></div>
+<script>
+const GRID = [
+  ["Lawful Good", "Neutral Good", "Chaotic Good"],
+  ["Lawful Neutral", "True Neutral", "Chaotic Neutral"],
+  ["Lawful Evil", "Neutral Evil", "Chaotic Evil"]
+];
+const ARCH = {
+  "0,0": ["🍅 The Classic Guardian", "Margherita purist"],
+  "1,0": ["🍍 The Harmonizer", "Pineapple diplomat"],
+  "2,0": ["🔥 The Flavor Maverick", "Spicy chaos for good"],
+  "0,1": ["🧀 The Rule Keeper", "Cheese-only traditionalist"],
+  "1,1": ["🍕 The Balanced One", "Any topping but balanced"],
+  "2,1": ["🎯 The Rebel Strategist", "BBQ bacon folded chaos"],
+  "0,2": ["🐟 The Anchovy General", "Salty domination"],
+  "1,2": ["🥩 The Meat Overlord", "All protein power moves"],
+  "2,2": ["💀 The Overlord of Excess", "Ranch flood + all toppings"]
+};
+
+const options = {
+  crust: ["Thin & crispy", "Thick & fluffy", "Stuffed crust"],
+  topping: ["Ham", "Bacon", "Jalapeños", "Mushrooms"],
+  sauce: ["Tomato", "BBQ", "White garlic"],
+  style: ["Tip first", "Crust first", "Fold slice", "Random bites"]
+};
+let state = { crust: null, topping: null, sauce: null, style: null };
+
+function computeAlignment() {
+  let x=1, y=1;
+  if(state.sauce==="Tomato") y-=1;
+  if(state.sauce==="White garlic") y+=1;
+  if(state.style==="Tip first") x-=1;
+  if(state.style==="Fold slice") x+=1;
+  if(state.style==="Random bites") x+=1;
+  if(state.topping==="Bacon") x+=1;
+  if(state.topping==="Jalapeños") x+=1;
+  if(state.crust==="Thin & crispy") x-=1;
+  if(state.crust==="Stuffed crust") x+=1;
+  x=Math.max(0,Math.min(2,x));
+  y=Math.max(0,Math.min(2,y));
+  return {x,y};
+}
+
+function render() {
+  const root = document.getElementById('quiz');
+  root.innerHTML = '';
+  for (let key in options) {
+    const sec = document.createElement('div');
+    sec.className = 'section';
+    sec.innerHTML = `<h3>${key[0].toUpperCase()+key.slice(1)}</h3>`;
+    options[key].forEach(opt => {
+      const btn = document.createElement('button');
+      btn.textContent = opt;
+      if(state[key]===opt) btn.classList.add('active');
+      btn.onclick = ()=>{ state[key]=opt; render(); };
+      sec.appendChild(btn);
+    });
+    root.appendChild(sec);
+  }
+  if(Object.values(state).every(v=>v)){
+    const res = computeAlignment();
+    const [title,desc] = ARCH[`${res.x},${res.y}`];
+    const out = document.createElement('div');
+    out.className='section';
+    out.innerHTML = `<h3>Your Alignment: ${GRID[res.y][res.x]}</h3><p>${title} - ${desc}</p>`;
+    root.appendChild(out);
+    const grid = document.createElement('div');
+    grid.className='grid';
+    for(let yy=0; yy<3; yy++){
+      for(let xx=0; xx<3; xx++){
+        const c = document.createElement('div');
+        c.className='cell';
+        if(xx===res.x && yy===res.y) c.classList.add('highlight');
+        c.innerHTML = `<strong>${GRID[yy][xx]}</strong><br>${ARCH[`${xx},${yy}`][0]}`;
+        grid.appendChild(c);
+      }
+    }
+    root.appendChild(grid);
+  }
+}
+render();
+</script>
+</body>
 </html>
